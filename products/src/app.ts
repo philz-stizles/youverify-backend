@@ -1,7 +1,11 @@
 import express from 'express'
 import 'express-async-errors'
 import cookieSession from 'cookie-session'
-import { errorHandler, NotFoundError } from '@devdezyn/common'
+import { currentUser, errorHandler, NotFoundError } from '@devdezyn/common'
+import createProductRouter from './routes/create'
+import readProductRouter from './routes/read'
+import listProductRouter from './routes/list'
+import updateProductRouter from './routes/update'
 
 const app = express()
 
@@ -16,6 +20,13 @@ app.use(
     secure: process.env.NODE_ENV !== 'test',
   })
 )
+
+app.use(currentUser)
+
+app.use(createProductRouter)
+app.use(readProductRouter)
+app.use(listProductRouter)
+app.use(updateProductRouter)
 
 app.all('*', async () => {
   throw new NotFoundError()
