@@ -1,15 +1,15 @@
-import express, { Request, Response } from 'express';
+import express, { Request, Response } from 'express'
 import {
   NotAuthorizedError,
   NotFoundError,
   OrderStatus,
   requireAuth,
-} from '@devdezyn/common';
-import Order from '../models/order';
-import { OrderCancelledPublisher } from '../events/publishers/order-cancelled-publisher';
-import { natsWrapper } from '../nats-wrapper';
+} from '@devdezyn/common'
+import Order from '../models/order'
+import { OrderCancelledPublisher } from '../events/publishers/order-cancelled-publisher'
+import { natsWrapper } from '../rabbitmq-wrapper'
 
-const router = express.Router();
+const router = express.Router()
 
 router.delete(
   '/api/orders/:orderId',
@@ -17,17 +17,17 @@ router.delete(
   async (req: Request, res: Response) => {
     const existingOrder = await Order.findById(req.params.orderId).populate(
       'ticket'
-    );
+    )
     if (!existingOrder) {
-      throw new NotFoundError();
+      throw new NotFoundError()
     }
 
     if (existingOrder.userId !== req.currentUser!.id) {
-      throw new NotAuthorizedError();
+      throw new NotAuthorizedError()
     }
 
-    existingOrder.status = OrderStatus.Cancelled;
-    await existingOrder.save();
+    existingOrder.status = OrderStatus.Cancelled
+    await existingOrder.save()
 
     // Publish an event saying this was cancelled
     await new OrderCancelledPublisher(natsWrapper.client).publish({
@@ -36,10 +36,10 @@ router.delete(
       ticket: {
         id: existingOrder.ticket.id,
       },
-    });
+    })
 
-    res.status(204).send(existingOrder);
+    res.status(204).send(existingOrder)
   }
-);
+)
 
-export { router as deleteOrderRouter };
+export { router as deleteOrderRouter }

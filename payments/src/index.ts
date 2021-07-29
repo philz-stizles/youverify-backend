@@ -1,6 +1,7 @@
 import mongoose from 'mongoose'
 import chalk from 'chalk'
 import app from './app'
+import { rabbitMQWrapper } from './rabbitmq-wrapper'
 // import { natsWrapper } from './nats-wrapper'
 // import { OrderCreatedListener } from './events/listeners/order-created-listener'
 // import { OrderCancelledListener } from './events/listeners/order-cancelled-listener'
@@ -17,31 +18,20 @@ const start = async () => {
     throw new Error('MONGO_URI must be defined')
   }
 
-  // if (!process.env.NATS_CLUSTER_ID) {
-  //   throw new Error('NATS_CLUSTER_ID must be defined');
-  // }
-
-  // if (!process.env.NATS_CLIENT_ID) {
-  //   throw new Error('NATS_CLIENT_ID must be defined');
-  // }
-
-  // if (!process.env.NATS_URL) {
-  //   throw new Error('NATS_URL must be defined');
-  // }
+  if (!process.env.RabbitMQ_URL) {
+    throw new Error('RabbitMQ_URL must be defined')
+  }
 
   try {
-    // await natsWrapper.connect(
-    //   process.env.NATS_CLUSTER_ID,
-    //   process.env.NATS_CLIENT_ID,
-    //   process.env.NATS_URL
-    // );
+    await rabbitMQWrapper.connect(process.env.RabbitMQ_URL, 'test')
 
-    // natsWrapper.client.on('close', () => {
-    //   console.log('NATS connection closed!');
-    //   process.exit();
-    // });
-    // process.on('SIGINT', () => natsWrapper.client.close());
-    // process.on('SIGTERM', () => natsWrapper.client.close());
+    rabbitMQWrapper.client.on('close', () => {
+      console.log('RabbitMQ connection closed!')
+      process.exit()
+    })
+
+    process.on('SIGINT', () => rabbitMQWrapper.client.close())
+    process.on('SIGTERM', () => rabbitMQWrapper.client.close())
 
     // new OrderCreatedListener(natsWrapper.client).listen();
     // new OrderCancelledListener(natsWrapper.client).listen();

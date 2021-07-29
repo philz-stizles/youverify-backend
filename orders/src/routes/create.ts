@@ -1,21 +1,21 @@
-import express, { Request, Response } from 'express';
-import mongoose from 'mongoose';
-import { body } from 'express-validator';
+import express, { Request, Response } from 'express'
+import mongoose from 'mongoose'
+import { body } from 'express-validator'
 import {
   NotFoundError,
   requireAuth,
   validateRequest,
   OrderStatus,
   BadRequestError,
-} from '@devdezyn/common';
-import Order from '../models/order';
-import Ticket from '../models/ticket';
-import { OrderCreatedPublisher } from '../events/publishers/order-created-publisher';
-import { natsWrapper } from '../nats-wrapper';
+} from '@devdezyn/common'
+import Order from '../models/order'
+import Ticket from '../models/ticket'
+import { OrderCreatedPublisher } from '../events/publishers/order-created-publisher'
+import { natsWrapper } from '../rabbitmq-wrapper'
 
-const router = express.Router();
+const router = express.Router()
 
-const EXPIRATION_WINDOW_SECONDS = 15 * 60;
+const EXPIRATION_WINDOW_SECONDS = 15 * 60
 
 router.post(
   '/api/orders',
@@ -29,23 +29,23 @@ router.post(
   ],
   validateRequest,
   async (req: Request, res: Response) => {
-    const { ticketId } = req.body;
+    const { ticketId } = req.body
 
     // Find the ticket the user is trying to order in the database
-    const existingTicket = await Ticket.findById(ticketId);
+    const existingTicket = await Ticket.findById(ticketId)
     if (!existingTicket) {
-      throw new NotFoundError();
+      throw new NotFoundError()
     }
 
     // Make sure the ticket is not already reserved
-    const isReserved = await existingTicket.isReserved();
+    const isReserved = await existingTicket.isReserved()
     if (isReserved) {
-      throw new BadRequestError('Ticket is already reserved');
+      throw new BadRequestError('Ticket is already reserved')
     }
 
     // Calculate an expiration date for this order
-    const expiresAt = new Date();
-    expiresAt.setSeconds(expiresAt.getSeconds() + EXPIRATION_WINDOW_SECONDS);
+    const expiresAt = new Date()
+    expiresAt.setSeconds(expiresAt.getSeconds() + EXPIRATION_WINDOW_SECONDS)
 
     // Build the order and save it to the database
     const newOrder = Order.build({
@@ -53,8 +53,8 @@ router.post(
       expiresAt,
       userId: req.currentUser!.id,
       ticket: existingTicket,
-    });
-    await newOrder.save();
+    })
+    await newOrder.save()
 
     // Publish an event saying that an order was created
     await new OrderCreatedPublisher(natsWrapper.client).publish({
@@ -67,10 +67,10 @@ router.post(
         id: existingTicket.id,
         price: existingTicket.price,
       },
-    });
+    })
 
-    res.status(201).send(newOrder);
+    res.status(201).send(newOrder)
   }
-);
+)
 
-export { router as createOrderRouter };
+export { router as createOrderRouter }

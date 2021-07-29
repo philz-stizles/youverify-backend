@@ -1,10 +1,7 @@
 import mongoose from 'mongoose'
 import chalk from 'chalk'
 import app from './app'
-// import { natsWrapper } from './nats-wrapper';
-// import { TicketCreatedListener } from './events/listeners/ticket-created-listener';
-// import { TicketUpdatedListener } from './events/listeners/ticket-updated-listener';
-// import { ExpirationCompleteListener } from './events/listeners/expiration-complete-listener';
+import { rabbitMQWrapper } from './rabbitmq-wrapper'
 // import dotenv from 'dotenv'
 
 // dotenv.config()
@@ -18,37 +15,21 @@ const start = async () => {
     throw new Error('MONGO_URI must be defined')
   }
 
-  // if (!process.env.NATS_CLUSTER_ID) {
-  //   throw new Error('NATS_CLUSTER_ID must be defined');
-  // }
-
-  // if (!process.env.NATS_CLIENT_ID) {
-  //   throw new Error('NATS_CLIENT_ID must be defined');
-  // }
-
-  // if (!process.env.NATS_URL) {
-  //   throw new Error('NATS_URL must be defined');
-  // }
+  if (!process.env.RabbitMQ_URL) {
+    throw new Error('RabbitMQ_URL must be defined')
+  }
 
   try {
-    // await natsWrapper.connect(
-    //   process.env.NATS_CLUSTER_ID,
-    //   process.env.NATS_CLIENT_ID,
-    //   process.env.NATS_URL
-    // );
+    await rabbitMQWrapper.connect(process.env.RabbitMQ_URL, 'test')
 
-    // natsWrapper.client.on('close', () => {
-    //   console.log('NATS connection closed!');
-    //   process.exit();
-    // });
-    // process.on('SIGINT', () => natsWrapper.client.close());
-    // process.on('SIGTERM', () => natsWrapper.client.close());
+    rabbitMQWrapper.client.on('close', () => {
+      console.log('RabbitMQ connection closed!')
+      process.exit()
+    })
 
-    // new TicketCreatedListener(natsWrapper.client).listen();
-    // new TicketUpdatedListener(natsWrapper.client).listen();
-    // new ExpirationCompleteListener(natsWrapper.client).listen();
+    process.on('SIGINT', () => rabbitMQWrapper.client.close())
+    process.on('SIGTERM', () => rabbitMQWrapper.client.close())
 
-    // The domain must be the name of the auth mongo pod service in the kubernetes cluster
     await mongoose.connect(process.env.MONGO_URI, {
       useNewUrlParser: true,
       useUnifiedTopology: true,

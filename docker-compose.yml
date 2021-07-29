@@ -1,30 +1,11 @@
 version: '3.7'
 services:
-  auth:
-    container_name: auth_service
-    restart: always
-    build:
-      dockerfile: Dockerfile # The name of the docker config file
-      context: ./auth # Where the docker config file is located
-    volumes:
-      - /app/node_modules
-      - ./auth:/app
-    ports:
-      - '30501:3000'
-    links:
-      - mongo
-    environment:
-      # - dev=1
-      # - db_service_name=mongo
-      - MONGO_URI=mongodb://mongo:27017/youverifyDb
-      - JWT_KEY=nh7dd4456vhbgkjvdDWQZXMKOY6FDEAmkbZMOPI
-      # - db_retry_time=3000
   customers:
     container_name: customers_service
     restart: always
     build:
       dockerfile: Dockerfile # The name of the docker config file
-      context: ./customers
+      context: ./customers # Where the docker config file is located
     volumes:
       - /app/node_modules
       - ./customers:/app
@@ -33,8 +14,11 @@ services:
     links:
       - mongo
     environment:
+      # - dev=1
+      # - db_service_name=mongo
       - MONGO_URI=mongodb://mongo:27017/youverifyDb
       - JWT_KEY=nh7dd4456vhbgkjvdDWQZXMKOY6FDEAmkbZMOPI
+      # - db_retry_time=3000
   products:
     container_name: products_service
     restart: always

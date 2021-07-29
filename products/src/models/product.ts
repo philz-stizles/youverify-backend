@@ -1,24 +1,26 @@
-import { Schema, Types, model, Document } from 'mongoose'
+import { Schema, Model, model, Document } from 'mongoose'
+import slugify from 'slugify'
 
-interface IUserRating {
-  star: number
-  postedBy: Types.ObjectId
+interface ProductAttrs {
+  title: string
+  description: string
+  price: number
+  quantity: number
+  shipping: boolean
 }
 
-export interface IProductDocument extends Document {
+interface ProductDocument extends Document {
   title: string
   slug: string
   description: string
   price: number
-  category: Types.ObjectId
-  subs: Types.ObjectId
   quantity: number
   sold: number
-  images: string[]
-  shipping: string
-  color: string
-  brand: string
-  ratings: IUserRating[]
+  shipping: boolean
+}
+
+interface ProductModel extends Model<ProductDocument> {
+  build(attrs: ProductAttrs): ProductDocument
 }
 
 const productSchema = new Schema(
@@ -45,30 +47,31 @@ const productSchema = new Schema(
     price: {
       type: Number,
       required: true,
-      trim: true,
       maxlength: 32,
     },
-    category: { type: Types.ObjectId, ref: 'Category' },
-    subs: [{ type: Types.ObjectId, ref: 'SubCategory' }],
     quantity: Number,
     sold: { type: Number, default: 0 },
-    images: { type: Array },
-    shipping: { type: String, enum: ['Yes', 'No'] },
-    color: {
-      type: String,
-      enum: ['Black', 'Brown', 'Silver', 'White', 'Blue'],
-    },
-    brand: {
-      type: String,
-      enum: ['Apple', 'Samsung', 'Microsoft', 'Lenovo', 'ASUS'],
-    },
-    ratings: [
-      { star: Number, postedBy: { type: Types.ObjectId, ref: 'User' } },
-    ],
+    shipping: { type: Boolean, default: false },
   },
   { timestamps: true }
 )
 
-const Product = model<IProductDocument>('Product', productSchema)
+productSchema.statics.build = (attrs: ProductAttrs) => {
+  return new Product({
+    title: attrs.title,
+    description: attrs.description,
+    price: attrs.price.toFixed(2),
+    quantity: attrs.quantity,
+    shipping: attrs.shipping,
+  })
+}
+
+productSchema.pre('save', async function (done) {
+  this.set('slug', slugify(this.get('title')))
+
+  done()
+})
+
+const Product = model<ProductDocument, ProductModel>('Product', productSchema)
 
 export default Product

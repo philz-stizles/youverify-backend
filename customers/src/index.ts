@@ -1,9 +1,10 @@
 import mongoose from 'mongoose'
 import chalk from 'chalk'
 import app from './app'
-// import dotenv from 'dotenv'
+import { seedUsers } from './models/seeder'
+import dotenv from 'dotenv'
 
-// dotenv.config()
+dotenv.config()
 
 const start = async () => {
   if (!process.env.JWT_KEY) {
@@ -22,12 +23,15 @@ const start = async () => {
       useCreateIndex: true,
     })
     console.log(chalk.green('Connected to MongoDb!!!'))
+
+    // Seed product data
+    await seedUsers()
   } catch (error) {
     console.error(chalk.red(error.message))
   }
 
   app.listen(3000, () => {
-    console.log('Customer Service is listening on port 3000!')
+    console.log(chalk.green('Customer Service is listening on port 3000!'))
   })
 }
 

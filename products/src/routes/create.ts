@@ -2,8 +2,6 @@ import express, { Request, Response } from 'express'
 import { body } from 'express-validator'
 import { BadRequestError, requireAuth, validateRequest } from '@devdezyn/common'
 import Product from '../models/product'
-// import { ProductCreatedPublisher } from '../events/publishers/Product-created-publisher'
-// import { natsWrapper } from '../nats-wrapper'
 
 const router = express.Router()
 
