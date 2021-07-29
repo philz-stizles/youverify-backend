@@ -1,14 +1,14 @@
 version: '3.7'
 services:
   customers:
-    container_name: customers_service
+    container_name: customer_service
     restart: always
     build:
       dockerfile: Dockerfile # The name of the docker config file
-      context: ./customers # Where the docker config file is located
+      context: ./customer-service # Where the docker config file is located
     volumes:
       - /app/node_modules
-      - ./customers:/app
+      - ./customer-service:/app
     ports:
       - '30502:3000'
     links:
@@ -16,58 +16,60 @@ services:
     environment:
       # - dev=1
       # - db_service_name=mongo
-      - MONGO_URI=mongodb://mongo:27017/youverifyDb
+      - MONGO_URI=mongodb://mongo:27017
       - JWT_KEY=nh7dd4456vhbgkjvdDWQZXMKOY6FDEAmkbZMOPI
       # - db_retry_time=3000
   products:
-    container_name: products_service
+    container_name: product_service
     restart: always
     build:
       dockerfile: Dockerfile # The name of the docker config file
-      context: ./products
+      context: ./product_service
     volumes:
       - /app/node_modules
-      - ./products:/app
+      - ./product_service:/app
     ports:
       - '30503:3000'
     links:
       - mongo
     environment:
-      - MONGO_URI=mongodb://mongo:27017/youverifyDb
+      - MONGO_URI=mongodb://mongo:27017
       - JWT_KEY=nh7dd4456vhbgkjvdDWQZXMKOY6FDEAmkbZMOPI
+      - RabbitMQ_URI=amqp://guest:guest@rabbitmq:5672
   orders:
     container_name: orders_service
     restart: always
     build:
       dockerfile: Dockerfile # The name of the docker config file
-      context: ./orders
+      context: ./order-service
     volumes:
       - /app/node_modules
-      - ./orders:/app
+      - ./order-service:/app
     ports:
       - '30504:3000'
     links:
       - mongo
     environment:
-      - MONGO_URI=mongodb://mongo:27017/youverifyDb
+      - MONGO_URI=mongodb://mongo:27017
       - JWT_KEY=nh7dd4456vhbgkjvdDWQZXMKOY6FDEAmkbZMOPI
+      - RabbitMQ_URI=amqp://guest:guest@rabbitmq:5672
   payments:
     container_name: payments_service
     restart: always
     build:
       dockerfile: Dockerfile # The name of the docker config file
-      context: ./payments
+      context: ./payment-service
     volumes:
       - /app/node_modules
-      - ./payments:/app
+      - ./payment-service:/app
     ports:
       - '30505:3000'
     links:
       - mongo
     environment:
-      - MONGO_URI=mongodb://mongo:27017/youverifyDb
+      - MONGO_URI=mongodb://mongo:27017
       - JWT_KEY=nh7dd4456vhbgkjvdDWQZXMKOY6FDEAmkbZMOPI
-      - RABBITMQ_CONNECTION_STRING=amqp://guest:guest@rabbitmq:5672
+      - RabbitMQ_URI=amqp://guest:guest@rabbitmq:5672
 
   rabbitmq:
     image: rabbitmq:3.8.9-management
