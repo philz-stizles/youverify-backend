@@ -5,8 +5,9 @@
 - Customer Service: Manages customer creation, read requests as well as updates.
 - Product Service: Manages product creation, read requests as well as updates. For this demo,
   the product service is responsible for sending the order to the order service.
-- Order Service: Manages
-- Payment Service:
+- Order Service: Manages orders and forwards them to the payment service for payment.
+- Payment Service: This service processes or orders from the order service and validates payment.
+  It then moves processed transactions off to the Worker for processing.
 - Worker: A service worker that listens for published payments from the payment service and the
   stores them in the database.
 
@@ -14,6 +15,7 @@
 
 - Clone the repo:
 - Ensure that you have Docker running on your system: (Download Docker)[]
+- Ensure that you have internet connect.
 - Navigate to the micro-service project root an run:
 
   ```bash
@@ -40,8 +42,40 @@
     GET http://localhost:3050/api/users/:email
   ```
 
-- Retrieve a list of products to choose from:
+- To place an order, you need to retrieve a list of products to choose from:
 
   ```js
     GET http://localhost:3050/api/products
+  ```
+
+- Now that you have all both a user and a product, we can place an order here:
+
+  Option one: In this scenario,
+
+  ```js
+    POST http://localhost:3050/api/products/place-order
+
+    Sample payload
+    {
+      "productId": "610320e2e076b1001e5bd091",
+      "customerId": "admin@testing.com"
+    }
+  ```
+
+  Option two:
+
+  ```js
+    POST http://localhost:3050/api/orders
+
+    Sample payload
+    {
+      "customerId": "admin@testing.com"
+      "product": {
+        "id": "An existing products id",
+        "title": "An existing products title",
+        "description": "An existing products description",
+        "price": "An existing products price",
+      },
+
+    }
   ```

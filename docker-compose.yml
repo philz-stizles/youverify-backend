@@ -79,23 +79,23 @@ services:
       - MONGO_URI=mongodb://mongo:27017
       - JWT_KEY=nh7dd4456vhbgkjvdDWQZXMKOY6FDEAmkbZMOPI
       - RabbitMQ_URI=amqp://guest:guest@rabbitmq:5672
-  # worker:
-  #   container_name: worker
-  #   restart: always
-  #   build:
-  #     dockerfile: Dockerfile # The name of the docker config file
-  #     context: ./worker
-  #   volumes:
-  #     - /app/node_modules
-  #     - ./worker:/app
-  #   # ports:
-  #   #   - '30505:3000'
-  #   links:
-  #     - mongo
-  #   environment:
-  #     - MONGO_URI=mongodb://mongo:27017
-  #     - JWT_KEY=nh7dd4456vhbgkjvdDWQZXMKOY6FDEAmkbZMOPI
-  #     - RabbitMQ_URI=amqp://guest:guest@rabbitmq:5672
+  worker:
+    container_name: worker
+    restart: always
+    build:
+      dockerfile: Dockerfile # The name of the docker config file
+      context: ./worker
+    volumes:
+      - /app/node_modules
+      - ./worker:/app
+    # ports:
+    #   - '30505:3000'
+    links:
+      - mongo
+    environment:
+      - MONGO_URI=mongodb://mongo:27017
+      - JWT_KEY=nh7dd4456vhbgkjvdDWQZXMKOY6FDEAmkbZMOPI
+      - RabbitMQ_URI=amqp://guest:guest@rabbitmq:5672
   rabbitmq:
     image: rabbitmq:3.8.9-management
     ports:

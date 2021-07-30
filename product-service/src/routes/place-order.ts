@@ -30,7 +30,7 @@ router.post(
       }
     )
 
-    console.log(response)
+    console.log(response.data)
 
     // rabbitMQWrapper.channel.sendToQueue(
     //   'ORDER',

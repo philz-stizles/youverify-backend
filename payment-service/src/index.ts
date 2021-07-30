@@ -19,6 +19,8 @@ const start = async () => {
   try {
     const client = await amqplib.connect(process.env.RabbitMQ_URI)
 
+    const channel: any = await client.createChannel()
+
     client.on('close', () => {
       console.log('RabbitMQ connection closed!')
       process.exit()
@@ -32,14 +34,16 @@ const start = async () => {
       console.log(err.message)
     })
 
-    const channel: any = await client.createChannel()
     await channel.assertQueue('PAYMENT')
 
     await channel.consume('PAYMENT', (data: any) => {
       if (data) {
-        console.log(data.content.toString())
+        const payload = JSON.parse(data.content)
+        console.log(payload)
+
+        channel.sendToQueue('TRANSACTION', Buffer.from(JSON.stringify(payload)))
+
         channel.ack(data)
-        // channel.cancel('myconsumer')
       }
     })
 

@@ -39,19 +39,19 @@ const start = async () => {
     await channel.consume('TRANSACTION', async (data: any) => {
       if (data) {
         console.log(data.content.toString())
-        const { customerId, product, orderId } = data.content
+        const { customerId, product, order } = data.content
         // Build the transaction from queue and save it to the database
         const newTransaction = Transaction.build({
           transactionRef: uuidV4(),
           customerId,
           productId: product.id,
-          orderId,
+          orderId: order.id,
           totalAmount: product.price,
         })
         await newTransaction.save()
 
         console.log(
-          `Transaction with order id ${orderId} belonging to customer ${customerId} 
+          `Transaction with order id ${order.id} belonging to customer ${customerId} 
           as been saved to the DB with Transaction ref ${newTransaction.transactionRef}.`
         )
 
@@ -62,7 +62,7 @@ const start = async () => {
     process.on('SIGINT', () => client.close())
     process.on('SIGTERM', () => client.close())
 
-    await mongoose.connect(process.env.MONGO_URI, {
+    await mongoose.connect(`${process.env.MONGO_URI}/transaction-service`, {
       useNewUrlParser: true,
       useUnifiedTopology: true,
       useCreateIndex: true,
