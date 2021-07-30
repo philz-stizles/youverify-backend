@@ -2,10 +2,13 @@
 
 ## SERVICES
 
-- Customer Service: Manages
-- Customer Service: Manages
-- Customer Service: Manages
-- Customer Service: Manages
+- Customer Service: Manages customer creation, read requests as well as updates.
+- Product Service: Manages product creation, read requests as well as updates. For this demo,
+  the product service is responsible for sending the order to the order service.
+- Order Service: Manages
+- Payment Service:
+- Worker: A service worker that listens for published payments from the payment service and the
+  stores them in the database.
 
 ## How TO TEST
 
@@ -19,18 +22,15 @@
 
 - Get Customer credentials:
 
-  - Option 1: Seeded Data
+  ```txt
+    User 1:
+    email: johndoe@testing.com
+    password: 'p@ssw0rd
 
-    ```txt
-      User 1:
-      email: johndoe@testing.com
-      password: 'p@ssw0rd
-
-      User 2:
-        email: admin@testing.com
-        password: p@ssw0rd
-
-    ```
+    User 2:
+      email: admin@testing.com
+      password: p@ssw0rd
+  ```
 
 - (optional) Retrieve any additional customer information should you require a customer ID to order a product.
   But you can use the customers email, since it is being stored as a string everywhere and no major logic is
