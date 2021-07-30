@@ -13,8 +13,8 @@
 
 ## How TO TEST
 
-- Clone the repo:
-- Ensure that you have Docker running on your system: (Download Docker)[]
+- Clone the repo
+- Ensure that you have Docker running on your system: [Download Docker](https://www.docker.com/products/docker-desktop)
 - Ensure that you have internet connect.
 - Navigate to the micro-service project root an run:
 
@@ -26,10 +26,12 @@
 
   ```txt
     User 1:
-    email: johndoe@testing.com
-    password: 'p@ssw0rd
+
+      email: johndoe@testing.com
+      password: 'p@ssw0rd
 
     User 2:
+
       email: admin@testing.com
       password: p@ssw0rd
   ```

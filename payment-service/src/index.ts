@@ -39,7 +39,16 @@ const start = async () => {
     await channel.consume('PAYMENT', (data: any) => {
       if (data) {
         const payload = JSON.parse(data.content)
+        console.log(
+          `Order ${payload.order.id} received by Payment Service. Order processing ....`
+        )
         console.log(payload)
+
+        // setTimeout(() =>
+        //   console.log(
+        //     `Order ${payload.order.id} has been processed, forwarding to worker ....`
+        //   )
+        // , 5000)
 
         channel.sendToQueue('TRANSACTION', Buffer.from(JSON.stringify(payload)))
 

@@ -38,8 +38,9 @@ const start = async () => {
 
     await channel.consume('TRANSACTION', async (data: any) => {
       if (data) {
-        console.log(data.content.toString())
-        const { customerId, product, order } = data.content
+        const payload = JSON.parse(data.content)
+        console.log(payload)
+        const { customerId, product, order } = payload
         // Build the transaction from queue and save it to the database
         const newTransaction = Transaction.build({
           transactionRef: uuidV4(),
