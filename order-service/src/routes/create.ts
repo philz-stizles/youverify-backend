@@ -1,12 +1,6 @@
 import express, { Request, Response } from 'express'
 import { body } from 'express-validator'
-import {
-  NotFoundError,
-  requireAuth,
-  validateRequest,
-  OrderStatus,
-  BadRequestError,
-} from '@devdezyn/common'
+import { validateRequest, OrderStatus } from '@devdezyn/common'
 import Order from '../models/order'
 import { rabbitMQWrapper } from './../rabbitmq-wrapper'
 
@@ -26,6 +20,8 @@ router.post(
   async (req: Request, res: Response) => {
     const { customerId, product } = req.body
 
+    console.log(req.body)
+
     // Build the order and save it to the database
     const newOrder = Order.build({
       status: OrderStatus.Created,
@@ -35,39 +31,26 @@ router.post(
     })
     await newOrder.save()
 
+    const createdOrder = {
+      order: {
+        id: newOrder.id,
+        createdAt: newOrder.createdAt,
+      },
+      customerId,
+      product: {
+        id: product.id,
+        title: product.title,
+        description: product.description,
+        price: product.price,
+      },
+    }
+
     rabbitMQWrapper.channel.sendToQueue(
       'PAYMENT',
-      Buffer.from(
-        JSON.stringify({
-          orderId: {
-            id: newOrder.id,
-            createdAt: newOrder.createdAt,
-          },
-          customerId,
-          product: {
-            id: product.id,
-            title: product.title,
-            description: product.description,
-            price: product.price,
-          },
-        })
-      )
+      Buffer.from(JSON.stringify(createdOrder))
     )
 
-    // Publish an event saying that an order was created
-    // await new OrderCreatedPublisher(natsWrapper.client).publish({
-    //   id: newOrder.id,
-    //   version: newOrder.version,
-    //   status: newOrder.status,
-    //   expiresAt: newOrder.expiresAt.toISOString(),
-    //   userId: newOrder.userId,
-    //   ticket: {
-    //     id: existingTicket.id,
-    //     price: existingTicket.price,
-    //   },
-    // })
-
-    res.status(201).send(newOrder)
+    res.status(201).send(createdOrder)
   }
 )
 

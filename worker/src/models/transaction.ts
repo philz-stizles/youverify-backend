@@ -3,17 +3,20 @@ import { updateIfCurrentPlugin } from 'mongoose-update-if-current'
 
 // Create an interface.
 interface TransactionAttrs {
+  transactionRef: string
+  orderId: string
   customerId: string
   productId: string
-  price: number
+  totalAmount: number
 }
 
 // An interface that describes the properties that a Transaction Document has
 interface TransactionDocument extends Document {
+  transactionRef: string
+  orderId: string
   customerId: string
   productId: string
-  price: number
-  version: number
+  totalAmount: number
   createdAt: string
 }
 
@@ -25,6 +28,14 @@ interface TransactionModel extends Model<TransactionDocument> {
 // Put as much business logic in the models to keep the controllers as simple and lean as possible
 const transactionSchema = new Schema(
   {
+    transactionRef: {
+      type: String,
+      required: true,
+    },
+    orderId: {
+      type: String,
+      required: true,
+    },
     customerId: {
       type: String,
       required: true,
@@ -33,7 +44,7 @@ const transactionSchema = new Schema(
       type: String,
       required: true,
     },
-    price: {
+    totalAmount: {
       type: Number,
       required: true,
     },

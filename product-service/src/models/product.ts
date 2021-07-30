@@ -52,7 +52,15 @@ const productSchema = new Schema(
     sold: { type: Number, default: 0 },
     shipping: { type: Boolean, default: false },
   },
-  { timestamps: true }
+  {
+    timestamps: true,
+    toJSON: {
+      transform(doc, ret) {
+        ret.id = ret._id
+        delete ret._id
+      },
+    },
+  }
 )
 
 productSchema.statics.build = (attrs: ProductAttrs) => {

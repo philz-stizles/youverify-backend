@@ -22,10 +22,13 @@ router.post(
       throw new NotFoundError()
     }
 
-    const response = await axios.post(process.env.ORDER_SERVICE as string, {
-      customerId,
-      product: existingProduct,
-    })
+    const response = await axios.post(
+      `${process.env.ORDER_URL as string}/api/orders`,
+      {
+        customerId,
+        product: existingProduct,
+      }
+    )
 
     console.log(response)
 

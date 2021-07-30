@@ -39,11 +39,12 @@ services:
     #   - '30503:3000'
     links:
       - mongo
+      - orders
     environment:
       - MONGO_URI=mongodb://mongo:27017
       - JWT_KEY=nh7dd4456vhbgkjvdDWQZXMKOY6FDEAmkbZMOPI
       - RabbitMQ_URI=amqp://guest:guest@rabbitmq:5672
-      - ORDER_SERVICE=http://orders
+      - ORDER_URL=http://orders:3000
   orders:
     container_name: orders_service
     restart: always
