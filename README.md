@@ -36,6 +36,15 @@
       password: p@ssw0rd
   ```
 
+- Nginx is running at:
+
+  ```js
+    http://localhost:3050
+  ```
+
+  Nginx is used as the proxy to proxy requests coming into the cluster. So while all the services are running
+  in separate containers with separate addresses and databases. Nginx has been configured to decide where to route traffic to
+
 - (optional) Retrieve any additional customer information should you require a customer ID to order a product.
   But you can use the customers email, since it is being stored as a string everywhere and no major logic is
   checking which is which, for demo purposes:
@@ -71,13 +80,19 @@
 
     Sample payload
     {
-      "customerId": "admin@testing.com"
+      "customerId": "admin@testing.com",
       "product": {
         "id": "An existing products id",
         "title": "An existing products title",
         "description": "An existing products description",
-        "price": "An existing products price",
-      },
+        "price": 456
+      }
 
     }
   ```
+
+- Observe the application console as the different listeners and publishers emit and consume payloads.
+- You can also check the container databases to verify creation and monitor state
+
+  MY TIME IS OUT
+  THIS WAS FUN
