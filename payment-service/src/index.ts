@@ -1,10 +1,7 @@
 import mongoose from 'mongoose'
 import chalk from 'chalk'
+import amqplib from 'amqplib'
 import app from './app'
-import { rabbitMQWrapper } from './rabbitmq-wrapper'
-// import dotenv from 'dotenv'
-
-// dotenv.config()
 
 const start = async () => {
   if (!process.env.JWT_KEY) {
@@ -20,15 +17,34 @@ const start = async () => {
   }
 
   try {
-    await rabbitMQWrapper.connect(process.env.RabbitMQ_URI, 'test')
+    const client = await amqplib.connect(process.env.RabbitMQ_URI)
 
-    rabbitMQWrapper.client.on('close', () => {
+    client.on('close', () => {
       console.log('RabbitMQ connection closed!')
       process.exit()
     })
 
-    process.on('SIGINT', () => rabbitMQWrapper.client.close())
-    process.on('SIGTERM', () => rabbitMQWrapper.client.close())
+    client.on('connect', () => {
+      console.log('Connected to RabbitMQ')
+    })
+
+    client.on('error', (err: any) => {
+      console.log(err.message)
+    })
+
+    const channel: any = await client.createChannel()
+    await channel.assertQueue('PAYMENT')
+
+    await channel.consume('PAYMENT', (data: any) => {
+      if (data) {
+        console.log(data.content.toString())
+        channel.ack(data)
+        // channel.cancel('myconsumer')
+      }
+    })
+
+    process.on('SIGINT', () => client.close())
+    process.on('SIGTERM', () => client.close())
 
     await mongoose.connect(process.env.MONGO_URI, {
       useNewUrlParser: true,

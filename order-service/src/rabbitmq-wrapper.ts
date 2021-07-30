@@ -24,6 +24,8 @@ class RabbitMQWrapper {
 
   async connect(url: string, queueName: string): Promise<void> {
     try {
+      this._client = await amqplib.connect(url)
+
       this.client.on('connect', () => {
         console.log('Connected to RabbitMQ')
       })
@@ -32,8 +34,8 @@ class RabbitMQWrapper {
         console.log(err.message)
       })
 
-      this._client = await amqplib.connect(url)
       this._channel = await this.client.createChannel()
+
       await this._channel.assertQueue(queueName)
     } catch (error) {
       console.log(error.message)

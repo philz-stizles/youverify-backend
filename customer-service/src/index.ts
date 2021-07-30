@@ -2,9 +2,9 @@ import mongoose from 'mongoose'
 import chalk from 'chalk'
 import app from './app'
 import { seedUsers } from './models/seeder'
-import dotenv from 'dotenv'
+// import dotenv from 'dotenv'
 
-dotenv.config()
+// dotenv.config()
 
 const start = async () => {
   if (!process.env.JWT_KEY) {

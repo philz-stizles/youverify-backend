@@ -1,25 +1,23 @@
 import { Schema, Model, model, Document } from 'mongoose'
 import { updateIfCurrentPlugin } from 'mongoose-update-if-current'
 import { OrderStatus } from '@devdezyn/common'
-import { ProductDocument } from './product'
 
 // Create an interface.
 interface OrderAttrs {
   status: OrderStatus
-  userId: string
+  customerId: string
   productId: string
   price: number
-  // ticket: ProductDocument
 }
 
 // An interface that describes the properties that a Order Document has
 interface OrderDocument extends Document {
   status: OrderStatus
-  userId: string
+  customerId: string
   productId: string
   price: number
-  // ticket: ProductDocument
   version: number
+  createdAt: string
 }
 
 // An interface that describes the properties that a Order Model has
@@ -36,10 +34,7 @@ const orderSchema = new Schema(
       enum: Object.values(OrderStatus),
       default: OrderStatus.Created,
     },
-    expiresAt: {
-      type: Schema.Types.Date,
-    },
-    userId: {
+    customerId: {
       type: String,
       required: true,
     },
@@ -53,6 +48,7 @@ const orderSchema = new Schema(
     },
   },
   {
+    timestamps: true,
     toJSON: {
       transform(doc, ret) {
         ret.id = ret._id

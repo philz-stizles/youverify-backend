@@ -1,9 +1,9 @@
 import mongoose from 'mongoose'
 import chalk from 'chalk'
+import amqplib from 'amqplib'
+import dotenv from 'dotenv'
 import app from './app'
 import { seedProducts } from './models/seeder'
-import { rabbitMQWrapper } from './rabbitmq-wrapper'
-import dotenv from 'dotenv'
 
 dotenv.config()
 
@@ -21,15 +21,38 @@ const start = async () => {
   }
 
   try {
-    await rabbitMQWrapper.connect(process.env.RabbitMQ_URI, 'test')
+    const client = await amqplib.connect(process.env.RabbitMQ_URI)
 
-    rabbitMQWrapper.client.on('close', () => {
+    client.on('close', () => {
       console.log('RabbitMQ connection closed!')
       process.exit()
     })
 
-    process.on('SIGINT', () => rabbitMQWrapper.client.close())
-    process.on('SIGTERM', () => rabbitMQWrapper.client.close())
+    client.on('connect', () => {
+      console.log('Connected to RabbitMQ')
+    })
+
+    client.on('error', (err: any) => {
+      console.log(err.message)
+    })
+
+    const channel: any = await client.createChannel()
+    await channel.assertQueue('PRODUCT')
+
+    await channel.consume(
+      'PRODUCT',
+      function (msg: any) {
+        if (msg) {
+          console.log(msg.content.toString())
+          channel.ack(msg)
+          // channel.cancel('myconsumer')
+        }
+      }
+      // { consumerTag: 'myconsumer' }
+    )
+
+    process.on('SIGINT', () => client.close())
+    process.on('SIGTERM', () => client.close())
 
     await mongoose.connect(`${process.env.MONGO_URI}/product-service`, {
       useNewUrlParser: true,
